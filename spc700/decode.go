@@ -1,6 +1,7 @@
 package spc700
 
 import (
+	"bytes"
 	"fmt"
 	"io/ioutil"
 )
@@ -57,7 +58,7 @@ var ram_keys = []string{
 	"64k_ram", "dsp_registers", "unused", "extra_ram", //"extended_ID666",
 }
 
-func chunk(f []byte, fr uint, to uint) []byte {
+func chunk(f []byte, fr int, to int) []byte {
 	return f[offsets[fr]:offsets[to]]
 }
 
@@ -72,7 +73,7 @@ func NewSPC() SPC_file {
 
 func (s *SPC_file) Decode(filename string) {
 	contents, _ := ioutil.ReadFile(filename)
-	var counter uint
+	var counter int
 
 	for _, key := range header_keys {
 		s.Headers[key] = chunk(contents, counter, counter+1)
@@ -93,12 +94,18 @@ func (s *SPC_file) Decode(filename string) {
 		s.Ram[key] = chunk(contents, counter, counter+1)
 		counter++
 	}
+	s.Ram["extended_ID666"] = contents[offsets[counter]:]
 }
 
 func (f *SPC_file) Save() error {
 
-	filename := fmt.Sprintf("%s - %s.spc", f.Song["game_title"], f.Song["song_title"])
-	fmt.Println(filename)
+	var filename string
+	// must trim zero padding
+	// fmt.Sprintf keeps the zero padding
+	filename = fmt.Sprintf("%s - %s.spc",
+		bytes.Trim(f.Song["game_title"], "\x00"),
+		bytes.Trim(f.Song["song_title"], "\x00"))
+
 	buffer := make([]byte, 0)
 
 	var counter uint
@@ -122,6 +129,8 @@ func (f *SPC_file) Save() error {
 		buffer = append(buffer, f.Ram[key]...)
 		counter++
 	}
+	buffer = append(buffer, f.Ram["extended_ID666"]...)
 
+	fmt.Println("FILE SIZE:", len(buffer))
 	return ioutil.WriteFile(filename, buffer, 0644)
 }

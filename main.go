@@ -24,6 +24,6 @@ func main() {
 
 	fmt.Println("Saving...")
 	if err := s.Save(); err != nil {
-		panic(err)
+		fmt.Println(err)
 	}
 }
