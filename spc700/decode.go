@@ -1,8 +1,6 @@
 package spc700
 
 import (
-	"bytes"
-	"fmt"
 	"io/ioutil"
 )
 
@@ -33,11 +31,7 @@ var offsets = []int{
 	0x10100, // DSP Registers
 	0x10180, // Unused
 	0x101C0, // Extra RAM (Memory Region used when the IPL ROM region is set to read-only)
-	0x10200, // Extended ID666
-	/*
-		-1 will not work in go, fix if you need this part
-		-1, // EOF (as far as slices are concerned)
-	*/
+	0x10200, // Extended ID666 starting point
 }
 
 var header_keys = []string{
@@ -55,7 +49,8 @@ var metadata_keys = []string{
 }
 
 var ram_keys = []string{
-	"64k_ram", "dsp_registers", "unused", "extra_ram", //"extended_ID666",
+	"64k_ram", "dsp_registers", "unused", "extra_ram",
+	// extended_ID666 handled outside of for loop
 }
 
 func chunk(f []byte, fr int, to int) []byte {
@@ -95,42 +90,4 @@ func (s *SPC_file) Decode(filename string) {
 		counter++
 	}
 	s.Ram["extended_ID666"] = contents[offsets[counter]:]
-}
-
-func (f *SPC_file) Save() error {
-
-	var filename string
-	// must trim zero padding
-	// fmt.Sprintf keeps the zero padding
-	filename = fmt.Sprintf("%s - %s.spc",
-		bytes.Trim(f.Song["game_title"], "\x00"),
-		bytes.Trim(f.Song["song_title"], "\x00"))
-
-	buffer := make([]byte, 0)
-
-	var counter uint
-
-	for _, key := range header_keys {
-		buffer = append(buffer, f.Headers[key]...)
-		counter++
-	}
-
-	for _, key := range register_keys {
-		buffer = append(buffer, f.Registers[key]...)
-		counter++
-	}
-
-	for _, key := range metadata_keys {
-		buffer = append(buffer, f.Song[key]...)
-		counter++
-	}
-
-	for _, key := range ram_keys {
-		buffer = append(buffer, f.Ram[key]...)
-		counter++
-	}
-	buffer = append(buffer, f.Ram["extended_ID666"]...)
-
-	fmt.Println("FILE SIZE:", len(buffer))
-	return ioutil.WriteFile(filename, buffer, 0644)
 }

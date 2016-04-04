@@ -22,6 +22,8 @@ func main() {
 	fmt.Println(string(s.Song["dumper_name"]))
 	fmt.Println(string(s.Song["game_title"]))
 
+	s.SetSongTitle("Memes")
+	s.SetGameTitle("Dank")
 	fmt.Println("Saving...")
 	if err := s.Save(); err != nil {
 		fmt.Println(err)
