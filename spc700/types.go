@@ -27,14 +27,14 @@ type Registers struct {
 	FF byte // Counter-2            R/
 }
 
-type SPC700_freeze struct {
+type SPC700 struct {
 	// Sound emulation data
-	PC  [2]byte // program counter
-	A   byte    // accumulator
-	X   byte    // index register
-	Y   byte    // index register
-	SP  byte    // stack pointer
-	PSW byte    // Program Status Word (explained below)
+	PC  uint16 // program counter
+	A   byte   // accumulator
+	X   byte   // index register
+	Y   byte   // index register
+	SP  byte   // stack pointer
+	PSW byte   // Program Status Word (explained below)
 	DSP [128]byte
 	RAM [0x10000]byte
 	/*
@@ -48,27 +48,17 @@ type SPC700_freeze struct {
 		0xFFC0 - 0xFFFF MEMORY [WRITE ONLY]
 		0xFFC0 - 0xFFFF 64 BYTE IPL ROM [READ ONLY]
 	*/
-
+	REGISTER Registers
 }
 
 // === PSW layout ===
-// bitmasks for PSW
+// bitmasks for PSW and direct page offsets
 // [N, V, P, B, H, I, Z, C]
-const NEGATIVE = 128      // N (Negative)
-const OVERFLOW = 64       // V (Overflow)
-const DIRECTPAGE = 32     // P (Direct page)
-const BREAK = 16          // B (Break)
-const HALFCARRY = 8       // H (Half Carry)
-const INTERUPTENABLED = 4 // I (Interrupt enabled (unused))
-const ZERO = 2            // Z (Zero)
-const CARRY = 1           // C (Carry)
-
-type CPU struct {
-	// CPU register set
-	PC  [2]byte // program counter
-	A   byte    // accumulator
-	X   byte    // index register
-	Y   byte    // index register
-	SP  byte    // stack pointer
-	PSW byte    // register contains various bits that effect operation of the CPU
-}
+const NEGATIVE, d7 = 128, 128    // N (Negative)
+const OVERFLOW, d6 = 64, 64      // V (Overflow)
+const DIRECTPAGE, d5 = 32, 32    // P (Direct page)
+const BREAK, d4 = 16, 16         // B (Break)
+const HALFCARRY, d3 = 8, 8       // H (Half Carry)
+const INTERUPTENABLED, d2 = 4, 4 // I (Interrupt enabled (unused))
+const ZERO, d1 = 2, 2            // Z (Zero)
+const CARRY, d0 = 1, 1           // C (Carry)
