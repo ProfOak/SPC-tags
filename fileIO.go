@@ -6,18 +6,18 @@ import (
 	"io/ioutil"
 )
 
-func rightpad(s string, size int) []byte {
-	b := make([]byte, size)
+func rightpad(str string, size int) []byte {
+	buffer := make([]byte, size)
 
 	// copy keeps old data, not overwritten, in dest
-	copy(b, []byte(s)[:])
+	copy(buffer, []byte(str)[:])
 
 	// zero pad (make sure old data is gone)
-	for i := len(s); i < size; i++ {
-		b[i] = 0
+	for i := len(str); i < size; i++ {
+		buffer[i] = 0
 	}
 
-	return b
+	return buffer
 }
 
 //  will add more at a later time

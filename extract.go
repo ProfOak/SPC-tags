@@ -58,61 +58,60 @@ func chunk(f []byte, fr int, to int) []byte {
 }
 
 func NewSPC() SPC_file {
-	var s SPC_file
-	s.Headers = make(map[string][]byte)
-	s.Registers = make(map[string][]byte)
-	s.Song = make(map[string][]byte)
-	s.Ram = make(map[string][]byte)
-	return s
+	var f SPC_file
+	f.Headers = make(map[string][]byte)
+	f.Registers = make(map[string][]byte)
+	f.Song = make(map[string][]byte)
+	f.Ram = make(map[string][]byte)
+	return f
 }
 
-func (s *SPC_file) Decode(filename string) {
+func (f *SPC_file) Decode(filename string) {
 	contents, _ := ioutil.ReadFile(filename)
 	var counter int
 
 	for _, key := range header_keys {
-		s.Headers[key] = chunk(contents, counter, counter+1)
+		f.Headers[key] = chunk(contents, counter, counter+1)
 		counter++
 	}
 
 	for _, key := range register_keys {
-		s.Registers[key] = chunk(contents, counter, counter+1)
+		f.Registers[key] = chunk(contents, counter, counter+1)
 		counter++
 	}
 
 	for _, key := range metadata_keys {
-		s.Song[key] = chunk(contents, counter, counter+1)
+		f.Song[key] = chunk(contents, counter, counter+1)
 		counter++
 	}
 
 	for _, key := range ram_keys {
-		s.Ram[key] = chunk(contents, counter, counter+1)
+		f.Ram[key] = chunk(contents, counter, counter+1)
 		counter++
 	}
-	s.Ram["extended_ID666"] = contents[offsets[counter]:]
+	f.Ram["extended_ID666"] = contents[offsets[counter]:]
 }
 
-func (s SPC_file) LoadCart() SPC700 {
+func (f SPC_file) LoadCart() SPC700 {
 	// temp variables for conversion
 	var (
-		pc  uint16 = uint16(s.Registers["pc"][0])<<8 + uint16(s.Registers["pc"][1])
+		pc  uint16 = uint16(f.Registers["pc"][0])<<8 + uint16(f.Registers["pc"][1])
 		dsp [128]byte
 		ram [0x10000]byte
 	)
 
-	copy(dsp[:], s.Registers["dsp"])
-	copy(ram[:], s.Ram["64k_ram"])
+	copy(dsp[:], f.Registers["dsp"])
+	copy(ram[:], f.Ram["64k_ram"])
 
 	// correct conversions
-	spc700 := SPC700{
+	return SPC700{
 		PC:  pc,
-		A:   s.Registers["a"][0], // technically byte arrays
-		X:   s.Registers["x"][0], // one byte long
-		Y:   s.Registers["y"][0], // silly "conversions"
+		A:   f.Registers["a"][0], // technically byte arrays
+		X:   f.Registers["x"][0], // one byte long
+		Y:   f.Registers["y"][0], // silly "conversions"
 		SP:  0,
-		PSW: s.Registers["psw"][0],
+		PSW: f.Registers["psw"][0],
 		DSP: dsp,
 		RAM: ram,
 	}
-	return spc700
 }
