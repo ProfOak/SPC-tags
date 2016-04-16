@@ -1,4 +1,4 @@
-package spc700
+package main
 
 import (
 	"bytes"

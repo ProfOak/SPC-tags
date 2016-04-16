@@ -1,4 +1,4 @@
-package spc700
+package main
 
 type SPC_file struct {
 	Headers   map[string][]byte

@@ -2,7 +2,6 @@ package main
 
 import (
 	"fmt"
-	"github.com/ProfOak/spc/spc700"
 	"os"
 )
 
@@ -13,7 +12,7 @@ func main() {
 	}
 	filename := os.Args[1]
 
-	s := spc700.NewSPC()
+	s := NewSPC()
 	s.Decode(filename)
 
 	fmt.Println(s.Song)
@@ -24,7 +23,7 @@ func main() {
 
 	s.SetSongTitle("Memes")
 	s.SetGameTitle("Dank")
-	fmt.Println("Saving...")
+	fmt.Printf("Saving... %s - %s\n", s.Song["game_title"], s.Song["song_title"])
 	if err := s.Save(); err != nil {
 		fmt.Println(err)
 	}

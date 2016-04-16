@@ -1,4 +1,4 @@
-package spc700
+package main
 
 func dp_offset(psw byte) int {
 	// direct page offset
@@ -14,6 +14,7 @@ var opcodes = []func(s *SPC700){
 	// jumptable
 
 	func(s *SPC700) { // 0x00
+		// NOP
 		s.PC += 2
 	},
 
@@ -29,7 +30,7 @@ var opcodes = []func(s *SPC700){
 	},
 
 	func(s *SPC700) { //0x03
-		//	PC+=r if d.0 == 1
+		// PC+=r if d.0 == 1
 		// r = relative offset 5/7
 		if s.RAM[dp_offset(s.PSW)]&1 == 1 {
 			s.PC += 7
@@ -46,7 +47,7 @@ var opcodes = []func(s *SPC700){
 	},
 
 	func(s *SPC700) { // 0x05
-		//	A | (abs)
+		// A | (abs)
 		s.PC += 4
 	},
 
