@@ -39,7 +39,7 @@ var header_keys = []string{
 }
 
 var register_keys = []string{
-	"pc", "a", "x", "y", "psw", "sp", "reserved",
+	"pc", "a", "x", "y", "psw", "dsp", "reserved",
 }
 
 var metadata_keys = []string{
@@ -90,4 +90,29 @@ func (s *SPC_file) Decode(filename string) {
 		counter++
 	}
 	s.Ram["extended_ID666"] = contents[offsets[counter]:]
+}
+
+func (s SPC_file) LoadCart() SPC700 {
+	// temp variables for conversion
+	var (
+		pc  uint16 = uint16(s.Registers["pc"][0])<<8 + uint16(s.Registers["pc"][1])
+		dsp [128]byte
+		ram [0x10000]byte
+	)
+
+	copy(dsp[:], s.Registers["dsp"])
+	copy(ram[:], s.Ram["64k_ram"])
+
+	// correct conversions
+	spc700 := SPC700{
+		PC:  pc,
+		A:   s.Registers["a"][0], // technically byte arrays
+		X:   s.Registers["x"][0], // one byte long
+		Y:   s.Registers["y"][0], // silly "conversions"
+		SP:  0,
+		PSW: s.Registers["psw"][0],
+		DSP: dsp,
+		RAM: ram,
+	}
+	return spc700
 }

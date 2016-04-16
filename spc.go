@@ -11,20 +11,32 @@ func main() {
 		return
 	}
 	filename := os.Args[1]
+	var (
+		f SPC_file
+		//s SPC700
+	)
 
-	s := NewSPC()
-	s.Decode(filename)
+	f = NewSPC()
 
-	fmt.Println(s.Song)
-	fmt.Println(string(s.Song["song_title"]))
-	fmt.Println(string(s.Song["artist"]))
-	fmt.Println(string(s.Song["dumper_name"]))
-	fmt.Println(string(s.Song["game_title"]))
+	// Read file, order content
+	f.Decode(filename)
 
-	s.SetSongTitle("Memes")
-	s.SetGameTitle("Dank")
-	fmt.Printf("Saving... %s - %s\n", s.Song["game_title"], s.Song["song_title"])
-	if err := s.Save(); err != nil {
+	// Load content into SPC700 cpu registers
+	// used for actual audio emulation
+	//s = f.LoadCart()
+
+	/* testing stuff */
+	fmt.Println(f.Song)
+	fmt.Println(string(f.Song["song_title"]))
+	fmt.Println(string(f.Song["artist"]))
+	fmt.Println(string(f.Song["dumper_name"]))
+	fmt.Println(string(f.Song["game_title"]))
+
+	f.SetSongTitle("Memes")
+	f.SetGameTitle("Dank")
+	fmt.Printf("Saving... %s - %s\n", f.Song["game_title"], f.Song["song_title"])
+	if err := f.Save(); err != nil {
 		fmt.Println(err)
 	}
+	/* /testing stuff */
 }
