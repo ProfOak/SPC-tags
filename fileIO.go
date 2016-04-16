@@ -35,7 +35,7 @@ func (f *SPC_file) SetGameTitle(title string) {
 }
 
 func (f *SPC_file) Save() error {
-
+	/* default save as the 'Game Name - Song Name' */
 	var filename string
 	// must trim zero padding
 	// fmt.Sprintf keeps the zero padding
@@ -43,6 +43,10 @@ func (f *SPC_file) Save() error {
 		bytes.Trim(f.Song["game_title"], "\x00"),
 		bytes.Trim(f.Song["song_title"], "\x00"))
 
+	return f.SaveAs(filename)
+}
+
+func (f *SPC_file) SaveAs(filename string) error {
 	buffer := make([]byte, 0)
 
 	var counter uint
