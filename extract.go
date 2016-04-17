@@ -34,21 +34,16 @@ var offsets = []int{
 	0x10200, // Extended ID666 starting point
 }
 
-var header_keys = []string{
+var keys = []string{
+	// headers
 	"header", "bits", "tags", "version_minor",
-}
-
-var register_keys = []string{
+	// registers
 	"pc", "a", "x", "y", "psw", "dsp", "reserved",
-}
-
-var metadata_keys = []string{
+	// metadata
 	"song_title", "game_title", "dumper_name", "comments", "date_dumped",
 	"num_of_sec_before_fade", "fade_length", "artist",
 	"default_channel_disables", "emulator_used", "reserved",
-}
-
-var ram_keys = []string{
+	// ram
 	"64k_ram", "dsp_registers", "unused", "extra_ram",
 	// extended_ID666 handled outside of for loop
 }
@@ -58,59 +53,43 @@ func chunk(f []byte, fr int, to int) []byte {
 }
 
 func NewSPC() SPC_file {
-	var f SPC_file
-	f.Headers = make(map[string][]byte)
-	f.Registers = make(map[string][]byte)
-	f.Song = make(map[string][]byte)
-	f.Ram = make(map[string][]byte)
-	return f
+	return make(SPC_file)
 }
 
-func (f *SPC_file) Decode(filename string) {
-	contents, _ := ioutil.ReadFile(filename)
+func (f SPC_file) Decode(filename string) error {
+	contents, err := ioutil.ReadFile(filename)
+	if err != nil {
+		return err
+	}
 	var counter int
 
-	for _, key := range header_keys {
-		f.Headers[key] = chunk(contents, counter, counter+1)
+	for _, key := range keys {
+		f[key] = chunk(contents, counter, counter+1)
 		counter++
 	}
-
-	for _, key := range register_keys {
-		f.Registers[key] = chunk(contents, counter, counter+1)
-		counter++
-	}
-
-	for _, key := range metadata_keys {
-		f.Song[key] = chunk(contents, counter, counter+1)
-		counter++
-	}
-
-	for _, key := range ram_keys {
-		f.Ram[key] = chunk(contents, counter, counter+1)
-		counter++
-	}
-	f.Ram["extended_ID666"] = contents[offsets[counter]:]
+	f["extended_ID666"] = contents[offsets[counter]:]
+	return nil
 }
 
 func (f SPC_file) LoadCart() SPC700 {
 	// temp variables for conversion
 	var (
-		pc  uint16 = uint16(f.Registers["pc"][0])<<8 + uint16(f.Registers["pc"][1])
+		pc  uint16 = uint16(f["pc"][0])<<8 + uint16(f["pc"][1])
 		dsp [128]byte
 		ram [0x10000]byte
 	)
 
-	copy(dsp[:], f.Registers["dsp"])
-	copy(ram[:], f.Ram["64k_ram"])
+	copy(dsp[:], f["dsp"])
+	copy(ram[:], f["64k_ram"])
 
 	// correct conversions
 	return SPC700{
 		PC:  pc,
-		A:   f.Registers["a"][0], // technically byte arrays
-		X:   f.Registers["x"][0], // one byte long
-		Y:   f.Registers["y"][0], // silly "conversions"
+		A:   f["a"][0], // technically byte arrays
+		X:   f["x"][0], // one byte long
+		Y:   f["y"][0], // silly "conversions"
 		SP:  0,
-		PSW: f.Registers["psw"][0],
+		PSW: f["psw"][0],
 		DSP: dsp,
 		RAM: ram,
 	}

@@ -1,11 +1,6 @@
 package main
 
-type SPC_file struct {
-	Headers   map[string][]byte
-	Registers map[string][]byte
-	Song      map[string][]byte
-	Ram       map[string][]byte
-}
+type SPC_file map[string][]byte
 
 type Registers struct {
 	//Mneumonic    Desc            Control

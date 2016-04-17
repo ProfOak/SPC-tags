@@ -26,15 +26,14 @@ func main() {
 	//s = f.LoadCart()
 
 	/* testing stuff */
-	fmt.Println(f.Song)
-	fmt.Println(string(f.Song["song_title"]))
-	fmt.Println(string(f.Song["artist"]))
-	fmt.Println(string(f.Song["dumper_name"]))
-	fmt.Println(string(f.Song["game_title"]))
+	fmt.Println(string(f["song_title"]))
+	fmt.Println(string(f["artist"]))
+	fmt.Println(string(f["dumper_name"]))
+	fmt.Println(string(f["game_title"]))
 
 	f.SetSongTitle("Memes")
 	f.SetGameTitle("Dank")
-	fmt.Printf("Saving... %s - %s\n", f.Song["game_title"], f.Song["song_title"])
+	fmt.Printf("Saving... %s - %s\n", f["game_title"], f["song_title"])
 	if err := f.Save(); err != nil {
 		fmt.Println(err)
 	}
